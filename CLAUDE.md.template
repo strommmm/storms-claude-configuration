@@ -1,0 +1,267 @@
+# Agent Team 研发流程规范
+
+## 团队角色与启动条件
+
+| 角色 | Agent | 基线建档 | 小型改造 | 大型改造 |
+|------|-------|----------|----------|----------|
+| 业务领域专家 | `domain-expert` | - | - | 必须 |
+| 产品经理 | `product-manager` | 必须 | 必须 | 必须 |
+| 交互设计专家 | `interaction-designer` | - | 按需 | 按需 |
+| 后端架构师 | `backend-architect` | 必须（汇总） | 必须 | 必须 |
+| 后端开发工程师 | `backend-developer` | 必须（按模块分析） | 必须 | 必须（多个） |
+| 前端开发工程师 | `frontend-developer` | 必须（分析前端） | 按需 | 按需 |
+| 集成测试专家 | `integration-tester` | - | 必须 | 必须 |
+
+**判断标准**：
+- **基线建档**：存量项目首次接入，缺乏文档体系
+- **小型改造**：单模块变更、功能迭代、Bug 修复
+- **大型改造**：跨模块变更、新产品线、架构级改造
+
+---
+
+## 流程阶段与人工确认网关
+
+### Phase 0: 基线建档（存量项目接入）
+
+对缺乏文档的存量项目，在进行任何改造前，先执行基线建档。
+
+**触发方式**：用户指示"对当前项目进行基线建档"，或 Team Lead 判断项目缺少必要文档时主动发起。
+
+**协作流程**：
+
+```
+Team Lead 扫描项目结构，识别模块列表
+    │
+    ├── 并行启动 ─────────────────────────────────────────┐
+    │                                                      │
+    │   产品经理                                           │
+    │   ├── 分析现有代码、配置、路由、页面                  │
+    │   ├── 逆向梳理产品功能全景                            │
+    │   └── 产出 docs/PRD.md（现状版）                     │
+    │                                                      │
+    │   后端开发工程师 × N（每人负责 1-2 个模块）           │
+    │   ├── 分析模块代码：实体、服务、控制器、事件          │
+    │   ├── 产出 src/<module>/docs/contracts.md            │
+    │   ├── 产出 src/<module>/docs/design-overview.md      │
+    │   └── 产出 src/<module>/docs/feature-<name>.md       │
+    │                                                      │
+    │   前端开发工程师                                      │
+    │   ├── 分析现有页面、组件、路由                        │
+    │   └── 梳理页面与后端 API 的调用关系                   │
+    │                                                      │
+    └── 汇总至架构师 ─────────────────────────────────────┘
+        │
+        架构师
+        ├── 接收各模块分析结果
+        ├── 识别领域模型和限界上下文
+        ├── 梳理模块间依赖关系（校验循环依赖）
+        ├── 产出 docs/architecture.md（现状版）
+        └── 产出 docs/module-dependencies.md
+            │
+            ▼
+    ⛔ 人工确认：用户审核基线文档
+```
+
+**启动角色**：
+
+| 角色 | 职责 |
+|------|------|
+| 产品经理 | 逆向分析现有产品功能，产出现状 PRD |
+| 后端开发工程师 × N | 各自分析分配的模块，产出模块级文档 |
+| 前端开发工程师 | 分析现有前端页面和 API 调用关系 |
+| 后端架构师 | 汇总各方分析，产出全局架构文档和依赖关系文档 |
+
+**产出文档**：
+- `docs/PRD.md` — 现状产品功能全景（标记为"现状版"）
+- `docs/architecture.md` — 现状架构设计文档
+- `docs/module-dependencies.md` — 模块间依赖关系
+- `src/<module>/docs/contracts.md` — 各模块接口契约
+- `src/<module>/docs/design-overview.md` — 各模块设计概览
+- `src/<module>/docs/feature-<name>.md` — 各功能详细设计
+
+**人工确认网关**：基线文档必须经用户审核确认后，后续改造才可基于此文档体系进行。
+
+---
+
+### Phase 1: 需求分析与 PRD
+
+- 产品经理编写 PRD（大型改造：与领域专家协作）
+- 产出：`docs/PRD.md`
+- **人工确认网关**：PRD 必须经用户确认后才能继续
+
+### Phase 2: 交互设计（按需）
+
+- 交互设计专家基于 PRD 产出 HTML/CSS/JS 交互原型
+- 产出：`docs/design/` 目录
+- **人工确认网关**：设计原型必须经用户确认后才能继续
+
+### Phase 3: 架构设计
+
+- 架构师进行 DDD 领域建模 + 模块拆分 + 契约定义
+- 大型改造时与领域专家讨论领域模型
+- 产出：架构文档、模块契约、依赖关系文档、任务清单
+- **大型改造**：架构设计需经用户确认
+- **小型改造**：直接进入开发阶段
+
+### Phase 4: 并行开发
+
+- 后端开发工程师按模块并行开发（TDD）
+- 前端开发工程师按页面维度开发
+- 每完成一个细分功能必须 commit
+- 契约变更须更新文档并通知依赖方
+
+### Phase 5: 集成测试
+
+- 集成测试专家根据 PRD 进行集成测试和回归测试
+- 问题反馈给对应模块开发工程师修复
+- 全部通过后完成交付
+
+---
+
+## 文档体系规范
+
+### 全局文档
+
+```
+docs/
+├── PRD.md                      # 产品需求文档
+├── architecture.md             # 系统架构设计文档
+├── module-dependencies.md      # 模块间依赖关系文档（全局）
+└── design/                     # 交互设计原型（按需）
+    ├── index.html
+    ├── styles/common.css
+    ├── scripts/common.js
+    └── page-*.html
+```
+
+### 模块文档（每个模块必须包含）
+
+```
+src/<module>/docs/
+├── contracts.md                # 接口契约文档
+│   ├── Service 接口（暴露给其他模块）
+│   ├── Controller 接口（暴露给前端的 HTTP API）
+│   └── Events（定义的关键领域事件）
+├── design-overview.md          # 模块设计概览
+└── feature-<name>.md           # 各功能详细设计文档
+```
+
+### 文档更新规则
+
+1. 接口契约变更 → 更新模块 `contracts.md` + 全局 `module-dependencies.md`
+2. 事件定义变更 → 更新模块 `contracts.md` Events 节 + 全局 `module-dependencies.md`
+3. 功能实现/变更 → 更新对应 `feature-<name>.md`
+4. 新增模块依赖 → 更新双方 `contracts.md` + 全局 `module-dependencies.md`
+
+---
+
+## DDD 模块规范
+
+### 模块目录结构
+
+```
+src/<module>/
+├── docs/                       # 模块文档
+├── domain/                     # 领域层（纯业务逻辑）
+│   ├── entities/
+│   ├── value-objects/
+│   ├── events/
+│   └── services/
+├── application/                # 应用层（用例编排）
+│   └── services/
+├── infrastructure/             # 基础设施层（技术实现）
+│   └── repositories/
+├── interfaces/                 # 接口层（对外暴露）
+│   ├── controllers/
+│   └── subscribers/
+└── __tests__/                  # 测试
+    ├── unit/
+    └── integration/
+```
+
+### 依赖规则
+
+1. **禁止循环依赖**：模块 A → B 则 B 不可 → A
+2. **层间依赖方向**：interfaces → application → domain ← infrastructure
+3. **跨模块通信**：
+   - 同步：通过模块暴露的 Service 接口
+   - 异步：通过领域事件（Event）解耦
+4. **事件驱动场景**：非核心依赖、异步处理、复杂业务流程解耦
+
+---
+
+## 开发规范
+
+### TDD 流程
+
+```
+RED → GREEN → REFACTOR → COMMIT
+```
+
+1. 编写测试（测试失败）
+2. 编写最少代码让测试通过
+3. 重构优化
+4. 确保所有测试通过后 commit
+
+### Commit 规范
+
+```
+<type>(<scope>): <description>
+```
+
+- `feat(<module>)`: 新功能
+- `fix(<module>)`: Bug 修复
+- `test(<module>)`: 测试
+- `refactor(<module>)`: 重构
+- `docs(<module>)`: 文档更新
+- `feat(frontend)`: 前端功能
+
+**每完成一个细分功能必须 commit。**
+
+### 契约变更协调流程
+
+1. 发现需要变更 → 通过 `SendMessage` 通知 Team Lead
+2. Team Lead 协调相关方确认
+3. 变更确认后：
+   - 更新发起方 `docs/contracts.md`
+   - 更新被依赖方 `docs/contracts.md`
+   - 更新全局 `docs/module-dependencies.md`
+4. 通知所有依赖方进行适配
+
+---
+
+## Team Lead 协调规则
+
+Team Lead（主 agent）负责：
+
+1. **评估需求规模**，决定启动哪些角色
+2. **判断是否需要基线建档**：项目缺少 `docs/architecture.md` 或模块缺少 `docs/contracts.md` 时，建议用户先执行基线建档
+3. **基线建档协调**：
+   - 扫描项目结构，识别模块列表
+   - 将模块分配给后端开发工程师（每人 1-2 个模块）
+   - 并行启动 PM、后端开发工程师、前端开发工程师
+   - 收集各方分析结果，转交架构师汇总
+   - 架构师完成后请求用户确认基线文档
+4. **管理人工确认网关**：
+   - 基线文档完成 → 请求用户确认
+   - PRD 完成 → 请求用户确认
+   - 交互设计完成 → 请求用户确认
+   - 架构设计完成（大型改造）→ 请求用户确认
+5. **协调契约变更**：收到变更请求后协调相关方
+6. **分配开发任务**：为开发工程师分配模块和任务
+7. **监控进度**：跟踪各阶段完成情况
+8. **协调问题修复**：测试发现问题后分派给对应开发工程师
+
+---
+
+## 文档模板
+
+所有文档模板位于 `~/.claude/templates/`：
+
+| 模板文件 | 用途 |
+|----------|------|
+| `PRD.md.tpl` | 产品需求文档模板 |
+| `contracts.md.tpl` | 模块接口契约文档模板 |
+| `design-overview.md.tpl` | 模块设计概览文档模板 |
+| `feature.md.tpl` | 功能详细设计文档模板 |
+| `module-dependencies.md.tpl` | 全局依赖关系文档模板 |
