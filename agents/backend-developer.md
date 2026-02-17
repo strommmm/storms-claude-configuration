@@ -85,14 +85,35 @@ src/<module>/
    - 更新全局 `docs/module-dependencies.md`
 5. 继续开发
 
+## 文档更新规范
+
+文档分为**规范文档**和**变更日志**两类，严格区分职责：
+
+### 规范文档（保持最新状态）
+- `contracts.md`、`design-overview.md`、`feature-<name>.md` 等
+- 有变更时直接更新到最新版本，底部追加版本变更记录
+- **禁止**在规范文档中混入改进实施方案、变更背景分析等内容
+
+### 变更日志（追加记录）
+- 路径：`src/<module>/docs/changelogs/YYYY-MM-DD-<需求概要>.md`
+- 每次实现新功能或修改现有逻辑时，新增一篇变更日志
+- 记录完整的变更上下文：需求背景、设计方案、实施细节、影响范围
+- 使用模板：`~/.claude/templates/changelog.md.tpl`
+
+### 每次变更的文档操作
+1. 在 `docs/changelogs/` 下创建变更日志
+2. 更新涉及的规范文档到最新状态（如有）
+3. 在规范文档底部追加版本变更记录条目
+
 ## 契约变更流程
 
 当需要变更已定义的接口或事件时：
 
-1. 更新本模块 `docs/contracts.md`
+1. 更新本模块 `docs/contracts.md`（保持最新状态，追加变更记录）
 2. 更新全局 `docs/module-dependencies.md`
-3. 通过 `SendMessage` 通知 Team Lead，由 Team Lead 协调通知所有依赖方
-4. 等待依赖方确认适配
+3. 在 `docs/changelogs/` 下记录变更详情
+4. 通过 `SendMessage` 通知 Team Lead，由 Team Lead 协调通知所有依赖方
+5. 等待依赖方确认适配
 
 ## 工作流程
 
@@ -101,13 +122,14 @@ src/<module>/
    - `src/<module>/docs/contracts.md` — 模块接口契约
    - `src/<module>/docs/design-overview.md` — 模块设计概览
    - `src/<module>/docs/feature-<name>.md` — 功能详细设计
+   - `src/<module>/docs/changelogs/` — 历史变更日志（了解历史决策）
 2. 理解模块职责和接口契约
 3. 按任务清单逐个实现功能：
    a. 编写测试（RED）
    b. 实现功能（GREEN）
    c. 重构优化（REFACTOR）
    d. 确保所有测试通过
-   e. 更新模块技术文档
+   e. 创建变更日志 + 更新规范文档
    f. **Commit**
 4. 完成所有任务后，通过 `SendMessage` 通知 Team Lead
 

@@ -138,20 +138,52 @@ docs/
 
 ```
 src/<module>/docs/
-├── contracts.md                # 接口契约文档
+├── contracts.md                # 接口契约文档（保持最新状态）
 │   ├── Service 接口（暴露给其他模块）
 │   ├── Controller 接口（暴露给前端的 HTTP API）
 │   └── Events（定义的关键领域事件）
-├── design-overview.md          # 模块设计概览
-└── feature-<name>.md           # 各功能详细设计文档
+├── design-overview.md          # 模块设计概览（保持最新状态）
+├── feature-<name>.md           # 各功能详细设计文档（保持最新状态）
+└── changelogs/                 # 变更日志目录（按时间追加）
+    └── YYYY-MM-DD-<需求概要>.md
 ```
+
+### 文档分类原则
+
+文档分为两类，**严格区分职责**：
+
+#### 1. 规范文档（保持最新状态）
+
+包括：`PRD.md`、`architecture.md`、`module-dependencies.md`、`contracts.md`、`design-overview.md`、`feature-<name>.md`
+
+- 始终反映系统的**当前最新状态**
+- 有变更时直接更新到最新版本
+- 底部保留**版本变更记录**（日期、版本号、变更摘要）
+- **禁止**在规范文档中混入具体的改进实施方案、变更背景分析等与文档定义无关的内容
+
+#### 2. 变更日志（追加记录）
+
+路径：`src/<module>/docs/changelogs/YYYY-MM-DD-<需求概要>.md`
+
+- 每次新需求或修改，在涉及的模块下新增一篇变更日志
+- 标题格式：`YYYY-MM-DD-<需求概要>`，例如 `2026-02-17-支持动态调整烹饪步骤.md`
+- 记录本次变更的**完整上下文**：需求背景、设计方案、实施细节、影响范围、关联的规范文档变更等
+- 所有关于"为什么改"和"怎么改"的信息都应在此文档中可查
+- 作为变更流水日志，供未来 agent 查阅历史决策和实施细节
 
 ### 文档更新规则
 
-1. 接口契约变更 → 更新模块 `contracts.md` + 全局 `module-dependencies.md`
-2. 事件定义变更 → 更新模块 `contracts.md` Events 节 + 全局 `module-dependencies.md`
-3. 功能实现/变更 → 更新对应 `feature-<name>.md`
-4. 新增模块依赖 → 更新双方 `contracts.md` + 全局 `module-dependencies.md`
+每次变更必须执行以下操作：
+
+1. **创建变更日志** → 在涉及的模块 `docs/changelogs/` 下新增变更日志文档
+2. **更新规范文档**（如涉及）：
+   - 接口契约变更 → 更新模块 `contracts.md` + 全局 `module-dependencies.md`
+   - 事件定义变更 → 更新模块 `contracts.md` Events 节 + 全局 `module-dependencies.md`
+   - 功能实现/变更 → 更新对应 `feature-<name>.md`
+   - 新增模块依赖 → 更新双方 `contracts.md` + 全局 `module-dependencies.md`
+   - 架构变更 → 更新 `architecture.md`
+   - 需求变更 → 更新 `PRD.md`
+3. **版本变更记录** → 在每个被更新的规范文档底部追加变更记录条目
 
 ---
 
@@ -162,6 +194,10 @@ src/<module>/docs/
 ```
 src/<module>/
 ├── docs/                       # 模块文档
+│   ├── changelogs/             # 变更日志（按时间追加）
+│   ├── contracts.md            # 接口契约（保持最新）
+│   ├── design-overview.md      # 设计概览（保持最新）
+│   └── feature-<name>.md      # 功能详设（保持最新）
 ├── domain/                     # 领域层（纯业务逻辑）
 │   ├── entities/
 │   ├── value-objects/
@@ -265,3 +301,4 @@ Team Lead（主 agent）负责：
 | `design-overview.md.tpl` | 模块设计概览文档模板 |
 | `feature.md.tpl` | 功能详细设计文档模板 |
 | `module-dependencies.md.tpl` | 全局依赖关系文档模板 |
+| `changelog.md.tpl` | 模块变更日志模板 |

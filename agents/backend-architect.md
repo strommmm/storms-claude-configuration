@@ -85,9 +85,11 @@ readonly: false
 ```
 src/<module>/
 ├── docs/
-│   ├── contracts.md        # 接口契约文档
-│   ├── design-overview.md  # 模块设计概览
-│   └── feature-<name>.md   # 功能详细设计
+│   ├── contracts.md        # 接口契约文档（保持最新状态）
+│   ├── design-overview.md  # 模块设计概览（保持最新状态）
+│   ├── feature-<name>.md   # 功能详细设计（保持最新状态）
+│   └── changelogs/         # 变更日志（按时间追加）
+│       └── YYYY-MM-DD-<需求概要>.md
 ├── domain/                 # 领域层
 │   ├── entities/           # 实体
 │   ├── value-objects/      # 值对象
@@ -166,3 +168,5 @@ src/<module>/
 - 接口契约定义精确，包含请求/响应的完整类型定义
 - 事件定义包含事件名称、负载（payload）类型、触发条件
 - 所有设计决策必须有文档记录
+- 规范文档只保持最新状态，底部留版本变更记录；具体的变更方案记录在模块 `docs/changelogs/` 下
+- 创建模块目录时须同时创建 `docs/changelogs/` 目录
