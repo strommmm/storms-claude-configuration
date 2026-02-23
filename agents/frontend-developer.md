@@ -45,11 +45,12 @@ readonly: false
 
 | 文档 | 用途 |
 |------|------|
+| `docs/topology.md` | 项目拓扑与路径映射（确认模块文档的实际位置） |
 | `docs/PRD.md` | 功能需求定义 |
 | `docs/design/README.md` | 设计说明 |
 | `docs/design/*.html` | 交互原型 |
 | `docs/architecture.md` | API 接口定义 |
-| `src/<module>/docs/contracts.md` | 后端接口契约详情 |
+| `src/<module>/docs/contracts.md` | 后端接口契约详情（多服务项目按 topology.md 路径映射解析实际路径） |
 
 ## 契约变更流程
 
@@ -100,6 +101,15 @@ readonly: false
 - **技术栈概况**：框架、UI 库、状态管理方案、构建工具
 
 此分析结果将被产品经理用于补充 PRD，被架构师用于梳理前端与后端模块的依赖关系。
+
+## 多服务项目注意事项
+
+多服务项目中，前端可能需要对接多个后端服务的 API：
+
+1. 阅读 `docs/topology.md` 路径映射表，了解各服务及其模块位置
+2. 按服务维度阅读各服务的 `contracts.md` Controller 接口定义
+3. API 基础路径可能因服务不同而不同（如通过 API Gateway 路由或不同域名）
+4. 跨服务的接口变更需通过 Team Lead 协调对应服务的后端开发工程师
 
 ---
 

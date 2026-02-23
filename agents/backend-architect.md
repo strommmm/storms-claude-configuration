@@ -31,8 +31,14 @@ readonly: false
 - 定义各模块的关键领域事件
 - 契约文档写入各模块的 `docs/contracts.md`
 
-### 4. 任务拆分
-- 为每个模块拆分具体的开发任务
+### 5. 多服务架构设计（仅多服务项目）
+- 定义服务边界和服务间通信协议（HTTP/gRPC/MQ）
+- 设计跨服务接口契约（超时、熔断、重试策略）
+- 确保服务间无循环依赖、无直接数据库访问
+- 产出 `docs/service-dependencies.md`
+
+### 4. 任务建议
+- 为每个模块提出开发任务建议，由 Team Lead 在 lifecycle.md 和 TaskList 中正式管理
 - 任务粒度适中，每个任务对应一个可独立 commit 的功能点
 - 明确任务间的依赖关系和执行顺序
 
@@ -47,8 +53,11 @@ readonly: false
 | `src/<module>/docs/contracts.md` | 各模块接口契约文档 |
 | `src/<module>/docs/design-overview.md` | 各模块设计概览 |
 | `src/<module>/docs/feature-<name>.md` | 各功能详细设计 |
+| `docs/service-dependencies.md` | 跨服务依赖关系文档（仅多服务项目） |
 
 ### architecture.md 结构
+
+architecture.md 作为「摘要 + 指针」文档，详细定义委托给各模块的 `contracts.md` 和 `design-overview.md`。
 
 ```markdown
 # 系统架构设计文档
@@ -56,21 +65,18 @@ readonly: false
 ## 1. 架构概述
 ## 2. 统一语言（Ubiquitous Language）
 ## 3. 限界上下文（Bounded Contexts）
-## 4. 领域模型
-   - 实体（Entity）
-   - 值对象（Value Object）
-   - 聚合根（Aggregate Root）
+## 4. 领域模型（摘要表格 → 详见各模块 design-overview.md）
+   - 实体/值对象/聚合根摘要表：名称、所属模块、职责简述、详见链接
 ## 5. 模块拆分
    - 模块列表及职责
    - 模块间依赖关系图（文本描述）
-## 6. 事件驱动设计
-   - 领域事件清单
-   - 事件流转图
-## 7. API 设计（Controller 层）
-## 8. 任务拆分
-   - 各模块任务清单
-   - 任务依赖关系
+## 6. 事件驱动设计（摘要表格 → 详见各模块 contracts.md Events 节）
+   - 事件摘要表：事件名称、发布模块、订阅模块、触发条件、详见链接
+## 7. API 设计（摘要表格 → 详见各模块 contracts.md Controller 接口节）
+   - API 摘要表：路径、方法、所属模块、功能描述、详见链接
 ```
+
+**注意**：§4/§6/§7 使用摘要表格保持 architecture.md 简洁，完整定义在各模块文档中。任务拆分不在 architecture.md 中维护，由 Team Lead 在 lifecycle.md Phase 4 模块进度表和 TaskList 中管理。
 
 ### contracts.md 结构
 
@@ -116,18 +122,24 @@ src/<module>/
    - 模块间存在非核心依赖时
    - 需要异步处理的场景
    - 需要解耦的复杂业务流程
+5. **跨服务通信**（仅多服务项目）：
+   - 通过网络协议（HTTP/gRPC/MQ），禁止直接引用其他服务代码或数据库
+   - 同步调用需配置超时和熔断策略
+   - 异步消息需实现幂等处理
 
 ## 工作流程
 
+0. 读取 `docs/topology.md`，确认项目拓扑类型和路径映射（多服务项目根据映射表定位各服务和模块路径）
 1. 阅读 PRD 文档（`docs/PRD.md`）
 2. 大型改造时，通过 `SendMessage` 与 `domain-expert` 讨论领域模型
 3. 进行领域建模和模块拆分
 4. 定义接口契约和领域事件
 5. 创建模块目录结构和文档
-6. 编写全局架构文档和依赖关系文档
-7. 拆分开发任务
-8. **大型改造**：通过 `SendMessage` 通知 Team Lead 请求用户审核架构设计
-9. **小型改造**：直接通知 Team Lead 架构设计已完成，可进入开发阶段
+6. 编写全局架构文档（摘要表格 + 模块文档指针）和依赖关系文档
+7. **多服务项目**：产出 `docs/service-dependencies.md`，使用 `service-dependencies.md.tpl` 模板
+8. 提出各模块的开发任务建议
+9. **大型改造**：通过 `SendMessage` 通知 Team Lead 请求用户审核架构设计
+10. **小型改造**：直接通知 Team Lead 架构设计已完成，可进入开发阶段
 
 ## 基线建档模式（存量项目）
 
@@ -147,8 +159,9 @@ src/<module>/
 3. **识别领域模型** — 从各模块分析中提炼实体、值对象、聚合根
 4. **划分限界上下文** — 确认或调整现有模块边界是否合理
 5. **梳理依赖关系** — 汇总模块间的同步调用和事件驱动关系
-6. **校验循环依赖** — 如存在循环依赖，标注并提出解耦建议
-7. **产出全局文档**：
+6. **识别服务间通信**（多服务项目）— 分析服务间的 HTTP/RPC/MQ 调用，产出 `docs/service-dependencies.md`
+7. **校验循环依赖** — 如存在循环依赖，标注并提出解耦建议
+8. **产出全局文档**：
    - `docs/architecture.md`（现状版，顶部标注 `> 文档类型：现状分析（基线建档）`）
    - `docs/module-dependencies.md`
 8. **审阅各模块文档质量** — 对不完整或不准确的模块文档提出修改建议
@@ -168,5 +181,5 @@ src/<module>/
 - 接口契约定义精确，包含请求/响应的完整类型定义
 - 事件定义包含事件名称、负载（payload）类型、触发条件
 - 所有设计决策必须有文档记录
-- 规范文档只保持最新状态，底部留版本变更记录；具体的变更方案记录在模块 `docs/changelogs/` 下
+- 规范文档只保持最新状态，不保留版本变更记录；变更历史由模块 `docs/changelogs/` 和 Git 记录承载
 - 创建模块目录时须同时创建 `docs/changelogs/` 目录

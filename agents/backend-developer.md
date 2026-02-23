@@ -50,8 +50,10 @@ RED → GREEN → REFACTOR
 
 遵循架构师定义的模块目录结构：
 
+<!-- 路径说明：单服务项目使用 src/<module>/；多服务项目按 topology.md 路径映射表替换为实际路径。 -->
+
 ```
-src/<module>/
+<module-path>/
 ├── domain/                 # 领域层 — 纯业务逻辑，无外部依赖
 │   ├── entities/
 │   ├── value-objects/
@@ -85,13 +87,29 @@ src/<module>/
    - 更新全局 `docs/module-dependencies.md`
 5. 继续开发
 
+## 跨服务依赖发现流程（仅多服务项目）
+
+当开发过程中发现需要调用其他服务的接口时：
+
+1. **停止当前开发**
+2. **通过 `SendMessage` 通知 Team Lead**：
+   - 说明需要调用的服务和接口
+   - 建议的协议（HTTP/gRPC/MQ）
+   - 建议的超时和失败策略
+3. **等待 Team Lead 协调双方服务的开发工程师确认**
+4. 确认后：
+   - 更新本模块 `docs/contracts.md` §5（跨服务接口 — 调用其他服务）
+   - 更新被调用方模块 `docs/contracts.md` §5（跨服务接口 — 对外暴露）
+   - 更新 `docs/service-dependencies.md`
+5. 继续开发
+
 ## 文档更新规范
 
 文档分为**规范文档**和**变更日志**两类，严格区分职责：
 
 ### 规范文档（保持最新状态）
 - `contracts.md`、`design-overview.md`、`feature-<name>.md` 等
-- 有变更时直接更新到最新版本，底部追加版本变更记录
+- 有变更时直接更新到最新版本，不保留版本变更记录（变更历史由 changelogs/ 和 Git 承载）
 - **禁止**在规范文档中混入改进实施方案、变更背景分析等内容
 
 ### 变更日志（追加记录）
@@ -103,13 +121,12 @@ src/<module>/
 ### 每次变更的文档操作
 1. 在 `docs/changelogs/` 下创建变更日志
 2. 更新涉及的规范文档到最新状态（如有）
-3. 在规范文档底部追加版本变更记录条目
 
 ## 契约变更流程
 
 当需要变更已定义的接口或事件时：
 
-1. 更新本模块 `docs/contracts.md`（保持最新状态，追加变更记录）
+1. 更新本模块 `docs/contracts.md`（保持最新状态）
 2. 更新全局 `docs/module-dependencies.md`
 3. 在 `docs/changelogs/` 下记录变更详情
 4. 通过 `SendMessage` 通知 Team Lead，由 Team Lead 协调通知所有依赖方
@@ -118,7 +135,9 @@ src/<module>/
 ## 工作流程
 
 1. 阅读分配的模块文档：
-   - `docs/architecture.md` — 全局架构
+   - `docs/topology.md` — 确认项目拓扑和路径映射（多服务项目按映射表定位模块实际路径）
+   - `docs/architecture.md` — 全局架构（摘要）
+   - `docs/prd/FR-*.md` — 与分配模块相关的功能需求明细（根据 PRD.md §3 总览表中的"所属模块"列筛选）
    - `src/<module>/docs/contracts.md` — 模块接口契约
    - `src/<module>/docs/design-overview.md` — 模块设计概览
    - `src/<module>/docs/feature-<name>.md` — 功能详细设计

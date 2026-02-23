@@ -1,6 +1,7 @@
 # 功能详细设计文档
 
 > 模块：{{MODULE_NAME}}
+> 所属服务：{{SERVICE_NAME}}（多服务项目填写；单服务项目删除此行）
 > 功能：{{FEATURE_NAME}}
 > 编号：F-XXX
 > 对应需求：FR-XXX
@@ -81,19 +82,13 @@
 ## 8. 代码位置
 
 <!-- 实现后填写，方便后续维护时快速定位 -->
+<!-- 路径说明：单服务项目使用 src/<module>/；多服务项目按 topology.md 路径映射表替换为实际路径。 -->
 
 | 层 | 文件路径 | 说明 |
 |----|----------|------|
-| Domain | `src/{{MODULE}}/domain/...` | |
-| Application | `src/{{MODULE}}/application/...` | |
-| Infrastructure | `src/{{MODULE}}/infrastructure/...` | |
-| Interface | `src/{{MODULE}}/interfaces/...` | |
-| Test | `src/{{MODULE}}/__tests__/...` | |
+| Domain | `{{MODULE_PATH}}/domain/...` | |
+| Application | `{{MODULE_PATH}}/application/...` | |
+| Infrastructure | `{{MODULE_PATH}}/infrastructure/...` | |
+| Interface | `{{MODULE_PATH}}/interfaces/...` | |
+| Test | `{{MODULE_PATH}}/__tests__/...` | |
 
----
-
-## 变更记录
-
-| 日期 | 版本 | 变更内容 | 作者 |
-|------|------|----------|------|
-| {{DATE}} | v1.0 | 初始版本 | Developer |

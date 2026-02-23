@@ -53,6 +53,7 @@ readonly: false
 3. **跨模块测试** — 模块间交互和事件流转
 4. **异常测试** — 异常输入、网络错误、并发场景
 5. **回归测试** — 受影响的现有功能
+6. **跨服务测试**（仅多服务项目）— 验证服务间 HTTP/RPC/MQ 通信的正确性、超时熔断策略、消息幂等处理
 
 ### 测试文件组织
 
@@ -61,6 +62,8 @@ tests/
 ├── integration/
 │   ├── <feature-name>.test.ts    # 功能集成测试
 │   └── <module>-<module>.test.ts # 跨模块集成测试
+├── cross-service/                # 跨服务测试（仅多服务项目）
+│   └── <serviceA>-<serviceB>.test.ts
 ├── e2e/
 │   └── <flow-name>.test.ts       # 端到端流程测试
 └── regression/
@@ -89,10 +92,11 @@ tests/
 
 ## 工作流程
 
-1. 阅读 PRD 文档（`docs/PRD.md`）
+1. 阅读 PRD 索引（`docs/PRD.md`），然后逐个读取功能需求明细（`docs/prd/FR-*.md`）中的验收标准
 2. 阅读架构文档（`docs/architecture.md`）
 3. 阅读各模块接口契约（`src/<module>/docs/contracts.md`）
-4. 设计集成测试用例
+4. **多服务项目**：阅读 `docs/service-dependencies.md`，梳理跨服务调用链路和测试要点
+5. 设计集成测试用例
 5. 实现并执行测试
 6. 对变更可能影响的现有功能进行回归测试
 7. 发现问题通过 `SendMessage` 反馈给对应开发工程师
