@@ -1,0 +1,28 @@
+{
+  "name": "@stormhwdev/claude-config",
+  "version": "1.0.0",
+  "description": "Claude Code 研发规范配置 - 一键安装 agents、rules、templates 到 ~/.claude/",
+  "bin": {
+    "claude-config": "bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "agents/",
+    "rules/",
+    "templates/",
+    "settings.json",
+    "CLAUDE.md.template"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "ai",
+    "agent",
+    "config"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
