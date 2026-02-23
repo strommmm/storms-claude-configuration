@@ -1,6 +1,6 @@
 {
   "name": "@stormhwdev/claude-config",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Claude Code 研发规范配置 - 一键安装 agents、rules、templates 到 ~/.claude/",
   "bin": {
     "claude-config": "bin/cli.js"
