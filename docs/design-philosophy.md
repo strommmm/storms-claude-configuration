@@ -4,34 +4,23 @@
 
 当你把一个大型需求交给单个 AI Agent，最初的输出往往令人惊艳。但随着对话轮次增加、上下文膨胀，你会观察到一个不可逆的衰退曲线：
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph LR
+    s1["需求理解<br/>★★★★★"]:::green
+    s2["架构设计<br/>★★★★★"]:::green
+    s3["模块A开发<br/>★★★★☆"]:::yellow
+    s4["模块B开发<br/>★★★☆☆"]:::orange
+    s5["模块C开发<br/>★★☆☆☆"]:::red
+    s6["集成调试<br/>★☆☆☆☆"]:::darkred
+    s7["修复&返工<br/>★☆☆☆☆"]:::darkred
 
-title Agent 输出质量与上下文长度的关系
+    s1 --> s2 --> s3 --> s4 --> s5 --> s6 --> s7
 
-rectangle "**单 Agent 模式**" as single {
-  card "需求理解" as s1 #90EE90
-  card "架构设计" as s2 #90EE90
-  card "模块A开发" as s3 #FFFFE0
-  card "模块B开发" as s4 #FFD700
-  card "模块C开发" as s5 #FFA500
-  card "集成调试" as s6 #FF6347
-  card "修复&返工" as s7 #FF0000
-}
-
-s1 -right-> s2
-s2 -right-> s3
-s3 -right-> s4
-s4 -right-> s5
-s5 -right-> s6
-s6 -right-> s7
-
-note bottom of s1 : 质量 ★★★★★
-note bottom of s4 : 质量 ★★★☆☆\n开始遗忘早期约定
-note bottom of s7 : 质量 ★☆☆☆☆\n幻觉频发、接口不一致
-@enduml
+    classDef green fill:#90EE90,stroke:#333,color:#000
+    classDef yellow fill:#FFFFE0,stroke:#333,color:#000
+    classDef orange fill:#FFD700,stroke:#333,color:#000
+    classDef red fill:#FFA500,stroke:#333,color:#000
+    classDef darkred fill:#FF6347,stroke:#333,color:#fff
 ```
 
 **幻觉增多** — Agent 开始"发明"前面并不存在的接口定义。**信息丢失** — 早期确定的业务规则被后续的海量代码淹没。**风格漂移** — 同一个项目中出现截然不同的代码风格和架构模式。
@@ -44,92 +33,71 @@ note bottom of s7 : 质量 ★☆☆☆☆\n幻觉频发、接口不一致
 
 解决方案的灵感来自人类工程团队的组织方式——没有人能同时是产品经理、架构师、开发者和测试工程师。人类团队通过**分工**和**契约**来协作，AI Agent 团队同样应该如此。
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
-skinparam componentStyle rectangle
+```mermaid
+graph LR
+    P1["<b>职责划分</b><br/>谁该做什么"]:::principle1
+    P2["<b>DDD 建模</b><br/>业务驱动模块边界"]:::principle2
+    P3["<b>上下文隔离</b><br/>每人只看该看的"]:::principle3
+    P4["<b>契约驱动</b><br/>用文档而非口头约定"]:::principle4
+    P5["<b>文档即状态</b><br/>一切可恢复、可追溯"]:::principle5
 
-title 设计五原则
+    P1 -- "分工需要<br/>合理的边界" --> P2
+    P2 -- "边界清晰使<br/>隔离成为可能" --> P3
+    P3 -- "隔离后需要<br/>明确的接口" --> P4
+    P4 -- "契约本身就是<br/>持久化的状态" --> P5
 
-package "职责划分" as P1 #E8F5E9 {
-  [谁该做什么]
-}
-
-package "DDD 建模" as P2 #E1F5FE {
-  [业务驱动模块边界]
-}
-
-package "上下文隔离" as P3 #E3F2FD {
-  [每人只看该看的]
-}
-
-package "契约驱动" as P4 #FFF3E0 {
-  [用文档而非口头约定]
-}
-
-package "文档即状态" as P5 #F3E5F5 {
-  [一切可恢复、可追溯]
-}
-
-P1 -right-> P2 : 分工需要\n合理的边界
-P2 -right-> P3 : 边界清晰使\n隔离成为可能
-P3 -right-> P4 : 隔离后需要\n明确的接口
-P4 -right-> P5 : 契约本身就是\n持久化的状态
-
-@enduml
+    classDef principle1 fill:#E8F5E9,stroke:#4CAF50,color:#000
+    classDef principle2 fill:#E1F5FE,stroke:#03A9F4,color:#000
+    classDef principle3 fill:#E3F2FD,stroke:#2196F3,color:#000
+    classDef principle4 fill:#FFF3E0,stroke:#FF9800,color:#000
+    classDef principle5 fill:#F3E5F5,stroke:#9C27B0,color:#000
 ```
 
 ### 原则一：职责划分 — 让专业的 Agent 做专业的事
 
 一个 Agent 不应该同时思考"用户想要什么"和"数据库表怎么建"。人类团队中产品经理不写代码、开发工程师不做产品决策，AI Agent 同样需要明确的角色边界。
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
-skinparam actorStyle awesome
+```mermaid
+graph TD
+    user["👤 用户"]
+    lead["🎯 Team Lead<br/>(主 Agent)"]
 
-actor "用户" as user #FFD700
+    user <--> lead
 
-rectangle "Agent Team" {
-  rectangle "需求侧" #E8F5E9 {
-    agent "产品经理" as pm
-    agent "领域专家" as de
-    agent "交互设计师" as id
-  }
+    subgraph need ["需求侧"]
+        pm["产品经理"]
+        de["领域专家"]
+        id["交互设计师"]
+    end
 
-  rectangle "技术侧" #E3F2FD {
-    agent "架构师" as arch
-    agent "开发工程师 A" as devA
-    agent "开发工程师 B" as devB
-    agent "前端工程师" as fe
-  }
+    subgraph tech ["技术侧"]
+        arch["架构师"]
+        devA["开发工程师 A"]
+        devB["开发工程师 B"]
+        fe["前端工程师"]
+    end
 
-  rectangle "质量侧" #FFF3E0 {
-    agent "测试专家" as tester
-  }
+    subgraph quality ["质量侧"]
+        tester["测试专家"]
+    end
 
-  agent "Team Lead\n(主 Agent)" as lead #FFCDD2
-}
+    lead --> pm
+    lead --> arch
+    lead --> devA
+    lead --> devB
+    lead --> fe
+    lead --> tester
 
-user <-down-> lead : 需求 & 确认
+    pm -. "领域咨询" .-> de
+    pm -. "交互协作" .-> id
+    de -. "领域模型输入" .-> arch
+    arch -. "契约约束" .-> devA
+    arch -. "契约约束" .-> devB
+    id -. "设计稿交付" .-> fe
 
-lead -down-> pm : 分配需求分析
-lead -down-> arch : 分配架构设计
-lead -down-> devA : 分配模块 A
-lead -down-> devB : 分配模块 B
-lead -down-> fe : 分配前端页面
-lead -down-> tester : 分配测试任务
-
-pm .right.> de : 领域咨询
-pm .right.> id : 交互协作
-de ..> arch : 领域模型输入
-arch ..> devA : 契约约束
-arch ..> devB : 契约约束
-id ..> fe : 设计稿交付
-
-@enduml
+    style need fill:#E8F5E9,stroke:#4CAF50
+    style tech fill:#E3F2FD,stroke:#2196F3
+    style quality fill:#FFF3E0,stroke:#FF9800
 ```
 
 每个 Agent 拥有**精确定义的职责边界**：
@@ -160,61 +128,43 @@ id ..> fe : 设计稿交付
 
 我们选择**领域驱动设计（DDD）**作为模块拆分的方法论。DDD 的核心思想是：**模块边界应该由业务语义决定，而不是由技术层次决定**。
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph TB
+    subgraph tech ["❌ 按技术层次拆分"]
+        direction TB
+        tc["Controllers"] --> ts["Services"] --> tr["Repositories"] --> tm["Models"]
+    end
 
-title 技术分层 vs DDD 领域划分
+    subgraph ddd ["✅ 按 DDD 领域拆分"]
+        subgraph order ["订单上下文"]
+            oe["实体 / 值对象"]
+            os["领域服务"]
+            oi["接口 / 仓储"]
+        end
+        subgraph pay ["支付上下文"]
+            pe["实体 / 值对象"]
+            ps["领域服务"]
+            pi["接口 / 仓储"]
+        end
+        subgraph inv ["库存上下文"]
+            ie["实体 / 值对象"]
+            is_["领域服务"]
+            ii["接口 / 仓储"]
+        end
+        order -. "领域事件" .-> pay
+        order -. "领域事件" .-> inv
+    end
 
-rectangle "按技术层次拆分" as tech #FFEBEE {
-  card "Controllers" as tc
-  card "Services" as ts
-  card "Repositories" as tr
-  card "Models" as tm
-
-  tc -down-> ts
-  ts -down-> tr
-  tr -down-> tm
-}
-
-note bottom of tech
-  一个需求变更
-  可能穿透所有层
-  上下文爆炸
-end note
-
-rectangle "按 DDD 领域拆分" as ddd #E8F5E9 {
-  package "订单上下文" as order #C8E6C9 {
-    card "实体/值对象" as oe
-    card "领域服务" as os
-    card "接口/仓储" as oi
-  }
-
-  package "支付上下文" as pay #C8E6C9 {
-    card "实体/值对象" as pe
-    card "领域服务" as ps
-    card "接口/仓储" as pi
-  }
-
-  package "库存上下文" as inv #C8E6C9 {
-    card "实体/值对象" as ie
-    card "领域服务" as is_
-    card "接口/仓储" as ii
-  }
-
-  order ..> pay : 领域事件
-  order ..> inv : 领域事件
-}
-
-note bottom of ddd
-  一个需求变更
-  只影响一个上下文
-  上下文可控
-end note
-
-@enduml
+    style tech fill:#FFEBEE,stroke:#E53935
+    style ddd fill:#E8F5E9,stroke:#43A047
+    style order fill:#C8E6C9,stroke:#388E3C
+    style pay fill:#C8E6C9,stroke:#388E3C
+    style inv fill:#C8E6C9,stroke:#388E3C
 ```
+
+> **技术分层**：一个需求变更可能穿透所有层，上下文爆炸。
+>
+> **领域划分**：一个需求变更只影响一个上下文，上下文可控。
 
 DDD 给 Agent 团队带来了三个关键优势：
 
@@ -230,40 +180,30 @@ DDD 推崇用领域事件（Domain Events）来解耦上下文之间的通信。
 
 DDD 强调"统一语言"（Ubiquitous Language），即团队成员对业务概念的表述必须一致。在 Agent 团队中，这通过**领域专家**的参与来保障。领域专家审核领域模型中的术语——确保 "Recipe"（配方）和 "Dish"（菜品）的区别在所有模块中保持一致，而不是一个 Agent 叫 "Recipe"、另一个 Agent 叫 "Menu Item"。
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph TD
+    pm["产品经理"]:::green
+    de["领域专家"]:::green
+    arch["架构师"]:::blue
 
-title DDD 建模过程中的 Agent 协作
+    prd[("PRD.md<br/>需求文档")]:::doc
+    model[("领域模型")]:::doc
+    contracts[("contracts.md<br/>模块契约")]:::doc
 
-rectangle "产品经理" as pm #E8F5E9
-rectangle "领域专家" as de #E8F5E9
-rectangle "架构师" as arch #E3F2FD
+    pm -- "产出需求" --> prd
+    de -- "校验业务准确性" --> prd
+    prd -- "输入" --> arch
 
-database "PRD.md\n需求文档" as prd #FFF9C4
-database "领域模型" as model #FFF9C4
-database "contracts.md\n模块契约" as contracts #FFF9C4
+    de -- "提供领域知识<br/>校验模型准确性" --> model
+    arch -- "识别限界上下文<br/>定义聚合根" --> model
+    model -- "转化为接口契约<br/>每个上下文一份" --> contracts
 
-pm -down-> prd : 产出需求
-de -down-> prd : 校验业务准确性
-
-prd -right-> arch : 输入
-
-de -down-> model : 提供领域知识\n校验模型准确性
-arch -down-> model : 识别限界上下文\n定义聚合根
-
-model -right-> contracts : 转化为接口契约\n每个上下文一份
-
-note bottom of model
-  限界上下文 → 模块
-  聚合根 → 核心实体
-  领域事件 → 模块间通信
-  值对象 → 业务规则封装
-end note
-
-@enduml
+    classDef green fill:#E8F5E9,stroke:#4CAF50,color:#000
+    classDef blue fill:#E3F2FD,stroke:#2196F3,color:#000
+    classDef doc fill:#FFF9C4,stroke:#F9A825,color:#000
 ```
+
+> **领域模型的转化**：限界上下文 → 模块，聚合根 → 核心实体，领域事件 → 模块间通信，值对象 → 业务规则封装
 
 这就是为什么架构师不是凭技术直觉拍脑袋拆模块，而是与领域专家一起，从业务语义出发，识别出**天然的边界**。这些边界不会因为技术重构而改变——因为它们反映的是业务本身的结构。
 
@@ -271,39 +211,36 @@ end note
 
 大语言模型存在一个隐性的**有效上下文窗口**。虽然上下文长度可以很大，但信息密度越高、跨度越大，模型的注意力就越分散。这就像一个人同时处理 10 件不相关的事——即使记忆力再好，也会顾此失彼。
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph LR
+    subgraph single ["❌ 单 Agent 的上下文"]
+        c1["PRD 全文"]:::warn
+        c2["架构设计"]:::warn
+        c3["模块A契约"]:::warn
+        c4["模块B契约"]:::warn
+        c5["模块C契约"]:::warn
+        c6["模块A代码"]:::warn
+        c7["模块B代码"]:::warn
+        c8["模块C代码"]:::warn
+        c9["测试代码"]:::warn
+        c10["配置文件"]:::warn
+    end
 
-title Agent 有效工作区（甜点区）
+    subgraph focused ["✅ 模块A 开发工程师的上下文"]
+        d1["模块A契约"]:::good
+        d2["模块A设计"]:::good
+        d3["模块A代码"]:::good
+        d4["模块A测试"]:::good
+    end
 
-rectangle "单 Agent 的上下文" #FFF3E0 {
-  card "PRD 全文" as c1 #FFCC80
-  card "架构设计" as c2 #FFCC80
-  card "模块A契约" as c3 #FFCC80
-  card "模块B契约" as c4 #FFCC80
-  card "模块C契约" as c5 #FFCC80
-  card "模块A代码" as c6 #FFCC80
-  card "模块B代码" as c7 #FFCC80
-  card "模块C代码" as c8 #FFCC80
-  card "测试代码" as c9 #FFCC80
-  card "配置文件" as c10 #FFCC80
-}
+    style single fill:#FFF3E0,stroke:#E65100
+    style focused fill:#E8F5E9,stroke:#2E7D32
 
-note right of c1 : 上下文越大\n有效利用率越低\n幻觉风险越高
-
-rectangle "模块A 开发工程师的上下文" #E8F5E9 {
-  card "模块A契约" as d1 #A5D6A7
-  card "模块A设计" as d2 #A5D6A7
-  card "模块A代码" as d3 #A5D6A7
-  card "模块A测试" as d4 #A5D6A7
-}
-
-note right of d1 : 上下文精简\n注意力集中\n输出质量高
-
-@enduml
+    classDef warn fill:#FFCC80,stroke:#E65100,color:#000
+    classDef good fill:#A5D6A7,stroke:#2E7D32,color:#000
 ```
+
+> 上下文越大，有效利用率越低，幻觉风险越高；上下文精简，注意力集中，输出质量高。
 
 我们的策略是**通过分工来实现上下文隔离**：
 
@@ -320,42 +257,41 @@ note right of d1 : 上下文精简\n注意力集中\n输出质量高
 
 人类团队可以在走廊里碰面聊两句来对齐信息。Agent 没有走廊。Agent 之间的一切协作必须通过**持久化的、结构化的文档**来完成。
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph TD
+    de["领域专家"]:::green
+    arch["架构师"]:::blue
+    devA["开发工程师 A"]:::green
+    devB["开发工程师 B"]:::green
+    fe["前端工程师"]:::orange
+    tester["测试专家"]:::purple
 
-title 契约文档作为 Agent 间的通信协议
+    cA[("模块A<br/>contracts.md")]:::doc
+    cB[("模块B<br/>contracts.md")]:::doc
+    dep[("module-<br/>dependencies.md")]:::doc
 
-rectangle "领域专家" as de #E8F5E9
-rectangle "架构师" as arch #E3F2FD
-rectangle "开发工程师 A" as devA #E8F5E9
-rectangle "开发工程师 B" as devB #E8F5E9
-rectangle "前端工程师" as fe #FFF3E0
-rectangle "测试专家" as tester #F3E5F5
+    de -. "领域模型校验" .-> arch
+    arch -- "定义" --> cA
+    arch -- "定义" --> cB
+    arch -- "定义" --> dep
 
-database "模块A\ncontracts.md" as cA #FFF9C4
-database "模块B\ncontracts.md" as cB #FFF9C4
-database "module-\ndependencies.md" as dep #FFF9C4
+    devA -- "遵循 & 实现" --> cA
+    devB -- "遵循 & 实现" --> cB
 
-de ..> arch : 领域模型校验
-arch -down-> cA : 定义
-arch -down-> cB : 定义
-arch -down-> dep : 定义
+    fe -- "查阅 API" --> cA
+    fe -- "查阅 API" --> cB
 
-devA -up-> cA : 遵循 & 实现
-devB -up-> cB : 遵循 & 实现
+    devA -. "查阅依赖" .-> dep
+    devB -. "查阅依赖" .-> dep
 
-fe -up-> cA : 查阅 API 契约
-fe -up-> cB : 查阅 API 契约
+    tester -- "验证" --> cA
+    tester -- "验证" --> cB
 
-devA -right-> dep : 查阅依赖
-devB -left-> dep : 查阅依赖
-
-tester -up-> cA : 验证
-tester -up-> cB : 验证
-
-@enduml
+    classDef green fill:#E8F5E9,stroke:#4CAF50,color:#000
+    classDef blue fill:#E3F2FD,stroke:#2196F3,color:#000
+    classDef orange fill:#FFF3E0,stroke:#FF9800,color:#000
+    classDef purple fill:#F3E5F5,stroke:#9C27B0,color:#000
+    classDef doc fill:#FFF9C4,stroke:#F9A825,color:#000
 ```
 
 每个模块的 `contracts.md` 包含三类契约：
@@ -372,42 +308,39 @@ tester -up-> cB : 验证
 
 AI Agent 的会话是易失的。一次网络中断、一次上下文截断，之前的所有进度就可能丢失。我们的方案是：**把所有状态外化到文档中**。
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph LR
+    subgraph prd ["需求文档 (PRD)"]
+        prd_what["定义：做什么"]
+        prd_fr["功能需求列表"]
+        prd_us["用户故事"]
+    end
 
-title 三类文档构成完整的状态机
+    subgraph contracts ["契约文档 (Contracts)"]
+        c_what["定义：怎么交互"]
+        c_svc["Service 接口"]
+        c_api["API 定义"]
+        c_evt["领域事件"]
+    end
 
-rectangle "需求文档 (PRD)" as prd #E8F5E9 {
-  card "定义：做什么" as prd_what
-  card "功能需求列表" as prd_fr
-  card "用户故事" as prd_us
-}
+    subgraph lifecycle ["生命周期文档 (Lifecycle)"]
+        l_what["定义：走到哪了"]
+        l_phase["阶段状态"]
+        l_team["团队分配"]
+        l_block["阻塞项"]
+    end
 
-rectangle "契约文档 (Contracts)" as contracts #E3F2FD {
-  card "定义：怎么交互" as c_what
-  card "Service 接口" as c_svc
-  card "API 定义" as c_api
-  card "领域事件" as c_evt
-}
+    prd -- "需求驱动<br/>契约设计" --> contracts
+    contracts -- "契约指导<br/>开发进度" --> lifecycle
 
-rectangle "生命周期文档 (Lifecycle)" as lifecycle #FFF3E0 {
-  card "定义：走到哪了" as l_what
-  card "阶段状态" as l_phase
-  card "团队分配" as l_team
-  card "阻塞项" as l_block
-}
-
-prd -right-> contracts : 需求驱动\n契约设计
-contracts -right-> lifecycle : 契约指导\n开发进度
-
-note bottom of prd : 目标层\n"系统要成为什么"
-note bottom of contracts : 接口层\n"模块间如何协作"
-note bottom of lifecycle : 过程层\n"当前进展到哪一步"
-
-@enduml
+    style prd fill:#E8F5E9,stroke:#4CAF50
+    style contracts fill:#E3F2FD,stroke:#2196F3
+    style lifecycle fill:#FFF3E0,stroke:#FF9800
 ```
+
+> **目标层** — "系统要成为什么"
+> **接口层** — "模块间如何协作"
+> **过程层** — "当前进展到哪一步"
 
 三类文档各司其职：
 
@@ -435,52 +368,31 @@ note bottom of lifecycle : 过程层\n"当前进展到哪一步"
 
 我们的答案是**测试驱动开发（TDD）**——不是作为一种工程美学，而是作为一种**对 Agent 特别有效的开发策略**。
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph TB
+    subgraph no_tdd ["❌ 没有 TDD"]
+        direction LR
+        n1["读契约"] --> n2["写代码<br/>(猜测行为)"] --> n3["跑一下<br/>看看"]
+        n3 --> n4["报错，修改"] --> n5["再跑"] --> n6["新的报错"] --> n7["继续修..."]
+    end
 
-title TDD 如何提升 Agent 的 One Shot 成功率
+    subgraph with_tdd ["✅ 使用 TDD"]
+        direction LR
+        t1["读契约"] --> t2["写测试<br/>(明确预期)"]:::red
+        t2 --> t3["写最小实现<br/>(让测试通过)"]:::tgreen
+        t3 --> t4["重构优化"]:::tblue
+        t4 --> t5["Commit"]
+    end
 
-rectangle "没有 TDD" as no_tdd #FFEBEE {
-  card "读契约" as n1
-  card "写代码（猜测行为）" as n2
-  card "跑一下看看" as n3
-  card "报错，修改" as n4
-  card "再跑" as n5
-  card "新的报错" as n6
-  card "继续修..." as n7
-}
+    style no_tdd fill:#FFEBEE,stroke:#E53935
+    style with_tdd fill:#E8F5E9,stroke:#43A047
 
-n1 -right-> n2
-n2 -right-> n3
-n3 -right-> n4
-n4 -right-> n5
-n5 -right-> n6
-n6 -right-> n7
-
-note bottom of n3 : 上下文开始\n被错误信息污染
-note bottom of n7 : 上下文膨胀\n质量急剧下降
-
-rectangle "使用 TDD" as with_tdd #E8F5E9 {
-  card "读契约" as t1
-  card "写测试\n（明确预期行为）" as t2 #EF9A9A
-  card "写最小实现\n（让测试通过）" as t3 #A5D6A7
-  card "重构优化" as t4 #90CAF9
-  card "Commit" as t5
-}
-
-t1 -right-> t2
-t2 -right-> t3
-t3 -right-> t4
-t4 -right-> t5
-
-note bottom of t2 : RED: 测试定义了\n"正确"的标准
-note bottom of t3 : GREEN: 目标明确\n一次写对
-note bottom of t4 : REFACTOR: 有测试\n兜底，重构安全
-
-@enduml
+    classDef red fill:#EF9A9A,stroke:#C62828,color:#000
+    classDef tgreen fill:#A5D6A7,stroke:#2E7D32,color:#000
+    classDef tblue fill:#90CAF9,stroke:#1565C0,color:#000
 ```
+
+> **RED**: 测试定义了"正确"的标准 → **GREEN**: 目标明确，一次写对 → **REFACTOR**: 有测试兜底，重构安全
 
 ### 为什么 TDD 对 Agent 特别有效？
 
@@ -506,49 +418,29 @@ note bottom of t4 : REFACTOR: 有测试\n兜底，重构安全
 
 TDD 的第三步是重构（REFACTOR）。有了完整的测试覆盖，Agent 可以大胆优化代码结构而不担心引入回归——测试会立即捕获任何破坏性改动。
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph TD
+    start(["开始"]) --> read["读取模块 contracts.md<br/>读取模块 design-overview.md"]
+    read --> pick["从契约中选取一个功能点"]
 
-title TDD 在 Agent 工作流中的位置
+    pick --> red["🔴 RED — 编写测试用例"]:::red
+    red --> green["🟢 GREEN — 编写最小实现"]:::tgreen
+    green --> run{"运行测试"}
 
-|开发工程师 Agent|
+    run -- "通过" --> refactor["🔵 REFACTOR — 优化代码"]:::tblue
+    refactor --> verify["运行测试确认无回归"]
+    verify --> commit["Git Commit"]
+    commit --> more{"还有更多<br/>功能点？"}
 
-start
+    run -- "失败" --> fix["分析失败原因<br/>修正实现"]
+    fix --> run
 
-:读取模块 contracts.md;
-:读取模块 design-overview.md;
+    more -- "是" --> pick
+    more -- "否" --> done(["模块开发完成"])
 
-repeat
-  :从契约中选取一个功能点;
-
-  #EF9A9A:RED — 编写测试用例;
-  note right: 测试定义预期行为\n此时测试一定失败
-
-  #A5D6A7:GREEN — 编写最小实现;
-  note right: 只写刚好让测试通过的代码\n不多不少，不猜不试
-
-  :运行测试;
-
-  if (通过？) then (是)
-    #90CAF9:REFACTOR — 优化代码;
-    :运行测试确认无回归;
-    :Git Commit;
-    note right: 每个功能点一次 commit\n渐进式交付
-  else (否)
-    :分析失败原因;
-    :修正实现;
-    note right: 有明确的失败信息\n而非模糊的"不对劲"
-  endif
-
-repeat while (还有更多功能点？) is (是)
-
-:模块开发完成;
-
-stop
-
-@enduml
+    classDef red fill:#EF9A9A,stroke:#C62828,color:#000
+    classDef tgreen fill:#A5D6A7,stroke:#2E7D32,color:#000
+    classDef tblue fill:#90CAF9,stroke:#1565C0,color:#000
 ```
 
 ### TDD + 上下文隔离 = 最大化 One Shot 率
@@ -565,137 +457,92 @@ TDD 的价值在与上下文隔离结合时被放大到极致：
 
 ## 完整流程：以一次大型改造为例
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
-skinparam swimlaneWidth 140
+```mermaid
+sequenceDiagram
+    actor U as 用户
+    participant L as Team Lead
+    participant PM as 产品经理
+    participant DE as 领域专家
+    participant ID as 交互设计师
+    participant AR as 架构师
+    participant D1 as 开发工程师 A
+    participant D2 as 开发工程师 B
+    participant FE as 前端工程师
+    participant QA as 测试专家
 
-|用户|
-|Team Lead|
-|产品经理|
-|领域专家|
-|交互设计师|
-|架构师|
-|开发工程师|
-|测试专家|
+    U->>L: 提出需求
+    L->>L: 评估规模 → 大型改造
+    L->>L: 初始化 lifecycle.md
 
-|用户|
-:提出需求;
+    rect rgb(232, 245, 233)
+        Note over PM,DE: Phase 1 — 需求分析
+        L->>PM: 启动需求分析
+        L->>DE: 启动领域咨询
+        PM->>DE: 业务规则咨询
+        DE-->>PM: 校验术语和流程
+        PM->>L: 产出 PRD.md
+    end
 
-|Team Lead|
-:评估规模 → 大型改造;
-:初始化 lifecycle.md;
-:启动产品经理 & 领域专家;
+    L->>U: ⛔ 请审核 PRD
+    U-->>L: ✅ PRD 确认
 
-|产品经理|
-:分析需求;
+    rect rgb(225, 245, 254)
+        Note over ID: Phase 2 — 交互设计
+        L->>ID: 启动交互设计
+        ID->>L: 产出 HTML/CSS 原型
+    end
 
-|领域专家|
-:校验业务规则;
-:确认术语定义;
+    L->>U: ⛔ 请审核交互设计
+    U-->>L: ✅ 设计确认
 
-|产品经理|
-:产出 PRD.md;
-note right: 领域专家确保\n需求描述的业务准确性
+    rect rgb(227, 242, 253)
+        Note over AR,DE: Phase 3 — 架构设计 (DDD)
+        L->>AR: 启动架构设计
+        AR->>DE: 领域建模协作
+        DE-->>AR: 校验限界上下文
+        AR->>L: 产出 contracts.md × N
+        AR->>L: 产出 architecture.md
+        AR->>L: 产出 module-dependencies.md
+    end
 
-|Team Lead|
-:Phase 1 → 待确认;
+    L->>U: ⛔ 请审核架构设计
+    U-->>L: ✅ 架构确认
 
-|用户|
-:审核 PRD;
-if (确认？) then (通过)
-else (不通过)
-  |Team Lead|
-  :Phase 1 → 进行中（返工）;
-  |产品经理|
-  :修改 PRD;
-  detach
-endif
+    rect rgb(255, 243, 224)
+        Note over D1,FE: Phase 4 — 并行开发 (TDD)
+        par 模块 A
+            L->>D1: 分配模块 A
+            D1->>D1: 读取 contracts.md
+            D1->>D1: TDD: RED → GREEN → REFACTOR
+            D1->>D1: commit
+        and 模块 B
+            L->>D2: 分配模块 B
+            D2->>D2: 读取 contracts.md
+            D2->>D2: TDD: RED → GREEN → REFACTOR
+            D2->>D2: commit
+        and 前端
+            L->>FE: 分配前端页面
+            FE->>FE: 读取交互设计稿
+            FE->>FE: 页面开发
+            FE->>FE: commit
+        end
+    end
 
-|Team Lead|
-:Phase 1 → 已完成;
-:启动交互设计师;
+    rect rgb(243, 229, 245)
+        Note over QA: Phase 5 — 集成测试
+        L->>QA: 启动集成测试
+        QA->>QA: 读取 PRD + contracts
+        QA->>QA: 执行集成测试
+        alt 发现问题
+            QA->>L: 反馈问题
+            L->>D1: 分派修复
+            D1->>D1: 修复并 commit
+        end
+        QA->>L: ✅ 全部通过
+    end
 
-|交互设计师|
-:基于 PRD 设计交互原型;
-:产出 HTML/CSS 原型;
-
-|用户|
-:审核交互设计;
-note right: 在写代码之前\n先看到产品形态
-
-|Team Lead|
-:Phase 2 → 已完成;
-:启动架构师;
-
-|架构师|
-:读取 PRD.md;
-
-|领域专家|
-:参与领域建模;
-:校验限界上下文划分;
-:确认聚合根和领域事件;
-
-|架构师|
-:DDD 领域建模;
-:识别限界上下文;
-:定义聚合根和领域事件;
-:产出每个模块的 contracts.md;
-:产出 architecture.md;
-:产出 module-dependencies.md;
-note right: 领域专家确保\n模块边界反映真实业务结构
-
-|Team Lead|
-:Phase 3 → 待确认;
-
-|用户|
-:审核架构设计;
-
-|Team Lead|
-:Phase 3 → 已完成;
-:Phase 4 → 进行中;
-fork
-  |开发工程师|
-  :读取模块A contracts.md;
-  :TDD: 写测试 → 写实现 → 重构;
-  :commit;
-fork again
-  |开发工程师|
-  :读取模块B contracts.md;
-  :TDD: 写测试 → 写实现 → 重构;
-  :commit;
-fork again
-  |开发工程师|
-  :读取交互设计稿;
-  :前端页面开发;
-  :commit;
-end fork
-
-|Team Lead|
-:Phase 4 → 已完成;
-:启动测试专家;
-
-|测试专家|
-:读取 PRD.md;
-:读取各模块 contracts.md;
-:执行集成测试;
-if (通过？) then (全部通过)
-  |Team Lead|
-  :Phase 5 → 已完成;
-  :交付;
-else (发现问题)
-  |Team Lead|
-  :分派问题给对应开发工程师;
-  |开发工程师|
-  :修复并 commit;
-  detach
-endif
-
-|用户|
-:验收;
-
-@enduml
+    L->>U: 交付完成
+    U->>U: 验收
 ```
 
 注意这个流程中的几个关键设计：
@@ -724,43 +571,29 @@ endif
 
 ## 为什么不直接给一个 Agent 塞完所有东西？
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph LR
+    subgraph single ["❌ 单 Agent 模式"]
+        s1["一个巨大的上下文窗口"]
+        s2["所有信息混在一起"]
+        s3["随时间衰退"]
+        s4["不可恢复"]
+    end
 
-title 两种模式的本质区别
+    subgraph team ["✅ Agent Team 模式"]
+        t1["多个精简的上下文窗口"]
+        t2["信息按职责隔离"]
+        t3["每个 Agent 持续高效"]
+        t4["随时可恢复"]
+    end
 
-rectangle "单 Agent 模式" as single #FFEBEE {
-  card "一个巨大的上下文窗口" as s_ctx
-  card "所有信息混在一起" as s_mix
-  card "随时间衰退" as s_decay
-  card "不可恢复" as s_norecover
-}
-
-rectangle "Agent Team 模式" as team #E8F5E9 {
-  card "多个精简的上下文窗口" as t_ctx
-  card "信息按职责隔离" as t_iso
-  card "每个 Agent 持续高效" as t_quality
-  card "随时可恢复" as t_recover
-}
-
-single -[hidden]right-> team
-
-note bottom of single
-  上下文 = 全部信息
-  Agent 知道太多
-  但什么都做不好
-end note
-
-note bottom of team
-  上下文 = 最小必要信息
-  Agent 知道的少
-  但做得精准
-end note
-
-@enduml
+    style single fill:#FFEBEE,stroke:#E53935
+    style team fill:#E8F5E9,stroke:#43A047
 ```
+
+> **单 Agent**：上下文 = 全部信息。Agent 知道太多，但什么都做不好。
+>
+> **Agent Team**：上下文 = 最小必要信息。Agent 知道的少，但做得精准。
 
 | | 单 Agent | Agent Team |
 |--|----------|-----------|
@@ -779,36 +612,37 @@ end note
 
 整个文档体系被刻意设计为三个层次，每一层服务于不同的目的：
 
-```plantuml
-@startuml
-!theme plain
-skinparam backgroundColor transparent
+```mermaid
+graph TD
+    subgraph goal ["🎯 目标层"]
+        prd["PRD.md — 功能需求明细"]
+        design["交互设计稿 — HTML/CSS 原型"]
+    end
 
-rectangle "目标层" as goal #C8E6C9 {
-  card "PRD.md\n功能需求明细" as prd
-  card "交互设计稿\nHTML/CSS 原型" as design
-}
+    subgraph interface ["🔗 接口层"]
+        contracts["contracts.md — Service / API / Events"]
+        deps["module-dependencies.md — 模块依赖关系"]
+        arch["architecture.md — 架构设计（DDD 领域模型）"]
+    end
 
-rectangle "接口层" as interface #BBDEFB {
-  card "contracts.md\nService / API / Events" as contracts
-  card "module-dependencies.md\n模块依赖关系" as deps
-  card "architecture.md\n架构设计（DDD 领域模型）" as arch
-}
+    subgraph process ["📋 过程层"]
+        lifecycle["lifecycle.md — 阶段状态 & 进度"]
+        changelog["changelogs/ — 变更历史"]
+    end
 
-rectangle "过程层" as process #FFE0B2 {
-  card "lifecycle.md\n阶段状态 & 进度" as lifecycle
-  card "changelogs/\n变更历史" as changelog
-}
+    goal -- "需求 + 设计<br/>拆解为模块和接口" --> interface
+    interface -- "接口指导实现<br/>过程跟踪进度" --> process
 
-goal -down-> interface : 需求 + 设计\n拆解为模块和接口
-interface -down-> process : 接口指导实现\n过程跟踪进度
-
-note right of goal : 产品经理 + 领域专家 + 交互设计师\n写入、校验、确认
-note right of interface : 架构师 + 领域专家\n定义边界、DDD 建模
-note right of process : Team Lead 维护\n开发工程师通过 TDD 推进
-
-@enduml
+    style goal fill:#C8E6C9,stroke:#388E3C
+    style interface fill:#BBDEFB,stroke:#1565C0
+    style process fill:#FFE0B2,stroke:#E65100
 ```
+
+> **目标层**：产品经理 + 领域专家 + 交互设计师 — 写入、校验、确认
+>
+> **接口层**：架构师 + 领域专家 — 定义边界、DDD 建模
+>
+> **过程层**：Team Lead 维护、开发工程师通过 TDD 推进
 
 这个分层背后的思考是：
 
